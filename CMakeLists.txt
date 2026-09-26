@@ -9,6 +9,7 @@
 
 
 
+set(CMAKE_POLICY_VERSION_MINIMUM 3.29 CACHE STRING "")
 cmake_minimum_required(VERSION 3.29)
 project(
     NetworkingProject
@@ -28,26 +29,27 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+#set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 # Set the output directory for all binaries
 set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 # Set the output directory to sort by platform (Output directory will be something like "bin/windows-amd64-debug")
 # NOTE: Multi-configuration generators (such as visual studio) append a per-configuration subdirectory to the specified directory 
 # https://cmake.org/cmake/help/latest/prop_tgt/LIBRARY_OUTPUT_DIRECTORY.html
 # e.g. OUTPUT_DIRECTORY_RELEASE
-foreach(config DEBUG RELEASE)
-    # Sorts by the different types of binaries
-    # DLL, EXE
-    #foreach(var CMAKE_LIBRARY_OUTPUT_DIRECTORY_${config} CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config})
-    # NOTE: Setting runtime output directory seems to overwrite any custom output directory set on executables. So only do this for libraries instead.
-    foreach(var CMAKE_LIBRARY_OUTPUT_DIRECTORY_${config})
-        set(${var} "${OUTPUT_DIRECTORY}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}-${config}")
-        string(TOLOWER "${${var}}" ${var})
-    endforeach()
-
-    # Lib's should stay in build folder, not needed for shipping / after the executable has been generated.
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${config} "${CMAKE_SOURCE_DIR}/out/lib/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}-${config}")
-endforeach()
+#foreach(config DEBUG RELEASE)
+#    # Sorts by the different types of binaries
+#    # DLL, EXE
+#    #foreach(var CMAKE_LIBRARY_OUTPUT_DIRECTORY_${config} CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config})
+#    # NOTE: Setting runtime output directory seems to overwrite any custom output directory set on executables. So only do this for libraries instead.
+#    foreach(var CMAKE_LIBRARY_OUTPUT_DIRECTORY_${config})
+#        set(${var} "${OUTPUT_DIRECTORY}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}-${config}")
+#        string(TOLOWER "${${var}}" ${var})
+#    endforeach()
+#
+#    # Lib's should stay in build folder, not needed for shipping / after the executable has been generated.
+#    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${config} "${CMAKE_SOURCE_DIR}/out/lib/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}-${config}")
+#endforeach()
 # Install directory, whatever that is
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/install")
 # Remove Unused Configurations (Use only Release & Debug)
@@ -93,18 +95,18 @@ target_include_directories(${PROJECT_NAME}-Client PUBLIC ${CMAKE_SOURCE_DIR}/Cli
 # Precompiled Header [TODO]
 #target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/NetworkingProject/Core/pch.h")
 # Copy over required files into bin folder with the executables
-add_custom_command(
-    TARGET ${PROJECT_NAME}-Server POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/external/SFML-3.0.0/bin"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}-Server>"
-)
-add_custom_command(
-    TARGET ${PROJECT_NAME}-Client POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/external/SFML-3.0.0/bin"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}-Client>"
-)
+#add_custom_command(
+#    TARGET ${PROJECT_NAME}-Server POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_directory
+#        "${CMAKE_SOURCE_DIR}/external/SFML-3.0.0/bin"
+#        "$<TARGET_FILE_DIR:${PROJECT_NAME}-Server>"
+#)
+#add_custom_command(
+#    TARGET ${PROJECT_NAME}-Client POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_directory
+#        "${CMAKE_SOURCE_DIR}/external/SFML-3.0.0/bin"
+#        "$<TARGET_FILE_DIR:${PROJECT_NAME}-Client>"
+#)
 
 
 
@@ -116,10 +118,12 @@ add_custom_command(
 target_include_directories(${PROJECT_NAME}-Server PUBLIC ${CMAKE_SOURCE_DIR}/external/Entt)
 target_include_directories(${PROJECT_NAME}-Client PUBLIC ${CMAKE_SOURCE_DIR}/external/Entt)
 ## SFML
-target_include_directories(${PROJECT_NAME}-Client PUBLIC ${CMAKE_SOURCE_DIR}/external/SFML-3.0.0/include)
-target_include_directories(${PROJECT_NAME}-Server PUBLIC ${CMAKE_SOURCE_DIR}/external/SFML-3.0.0/include)
-file(GLOB_RECURSE SFML_LIB CONFIGURE_DEPENDS
-    "${CMAKE_SOURCE_DIR}/external/SFML-3.0.0/lib/*.lib"
+add_subdirectory("external/SFML-3.0.0" EXCLUDE_FROM_ALL)
+target_link_libraries(${PROJECT_NAME}-Server
+    PRIVATE SFML::Graphics
+    PRIVATE SFML::Network
 )
-target_link_libraries(${PROJECT_NAME}-Client ${SFML_LIB})
-target_link_libraries(${PROJECT_NAME}-Server ${SFML_LIB})
+target_link_libraries(${PROJECT_NAME}-Client
+    PRIVATE SFML::Graphics
+    PRIVATE SFML::Network
+)
