@@ -45,7 +45,7 @@ int main()
             // FIXME [DONE]: currently, the application will continue even if it fails to connect.
             // Handle this more gracefully.
 
-            std::cout << "Press a key to reattempt conection\n";
+            std::cout << "Press a key to reattempt connection\n";
             system("pause");
         }
         else {
