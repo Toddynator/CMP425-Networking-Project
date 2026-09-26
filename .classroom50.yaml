@@ -1,0 +1,12 @@
+schema: "classroom50/repo-config/v1"
+classroom: "cmp425-501-2026-27"
+assignment: "lab-1"
+owner:
+  username: "Toddynator"
+  id: 157806713
+  accepted_at: "2026-09-22T17:09:44Z"
+source:
+  owner: "cmp425-501"
+  owner_id: 321398351
+  repo: "networking-lab1"
+  branch: "main"
